@@ -2,13 +2,15 @@
 1) АиСД-2, 2023, задание 1
 2) Ганина Ксения Андреевна 212
 3) CLion
-4) 28 удар... 13 сортировок, замеры времени, сохранение результатов замеров в файл .cvs
+4) 28 удар... 13 сортировок, замеры времени
    функция проверки упорядоченности элементов массива
-5) генерация массивов, счётчик эл-х операций, графики,
+   генерация массивов
    вывод исходного массива в input.txt, полученного в output.txt
+5) счётчик эл-х операций, графики, сохранение результатов замеров в файл .cvs
 */
 
 #include <algorithm>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -149,28 +151,29 @@ void binaryInsertionSort(std::vector<int> &a) {
     }
 }
 
-// #7 counting sort stable // ? what to do with k...
+// #7 counting sort stable
+// does not deal with negative nums as task works with nums >= 0
 
 void countingSort(std::vector<int> &a) {
     int n = static_cast<int>(a.size());
-    int k = MAX_VALUE;
-    int min = 1e9;
+    int max = 0;
     for (int i = 0; i < n; ++i) {
-        if (a[i] < min) {
-            min = a[i];
+        if (a[i] > max) {
+            max = a[i];
         }
     }
+    int k = max + 1;
     std::vector<int> b(n, 0);
     std::vector<int> c(k, 0);
     for (int i = 0; i < n; ++i) {
-        c[a[i] + abs(min)] = c[a[i] + abs(min)] + 1;
+        c[a[i]] = c[a[i]] + 1;
     }
     for (int i = 1; i < k; ++i) {
         c[i] = c[i] + c[i - 1];
     }
     for (int i = n - 1; i >= 0; --i) {
-        c[a[i] + abs(min)] = c[a[i] + abs(min)] - 1;
-        b[c[a[i] + abs(min)]] = a[i];
+        c[a[i]] = c[a[i]] - 1;
+        b[c[a[i]]] = a[i];
     }
     for (int i = 0; i < n; ++i) {
         a[i] = b[i];
@@ -178,15 +181,10 @@ void countingSort(std::vector<int> &a) {
 }
 
 // #8 radix sort by base 256
+// does not deal with negative nums as task works with nums >= 0
 
 void radixSort(std::vector<int> &a) {
     int n = static_cast<int>(a.size());
-    int min = 1e9;
-    for (int i = 0; i < n; ++i) {
-        if (a[i] < min) {
-            min = a[i];
-        }
-    }
     std::vector<int> b(n);
     const int integer_bites = 4;
     const int base = 256;
@@ -194,13 +192,13 @@ void radixSort(std::vector<int> &a) {
         std::vector<int> c(base, 0);
         const int mask = base - 1;
         for (int j = 0; j < n; ++j) {
-            ++c[((a[j] + abs(min)) >> (i * 8)) & mask];
+            ++c[((a[j]) >> (i * 8)) & mask];
         }
         for (int j = 1; j < base; ++j) {
             c[j] += c[j - 1];
         }
         for (int j = n - 1; j >= 0; --j) {
-            b[--c[((a[j] + abs(min)) >> (i * 8)) & mask]] = a[j];
+            b[--c[((a[j]) >> (i * 8)) & mask]] = a[j];
         }
         for (int j = 0; j < n; ++j) {
             a[j] = b[j];
@@ -341,7 +339,84 @@ void shellSort(std::vector<int> &a) {
     }
 }
 
-// generate array
+// generate arrays
+
+std::vector<int> generateVec(int n, int type) {
+    std::vector<int> vec(n);
+    int start = 0;
+    int end = 5;
+    if (type == 4) {
+        start = 1;
+        end = 4100;
+    } else if (type == 2 || type == 3) {
+        end = 4000;
+    }
+    srand(time(nullptr));
+    for (int & i : vec) {
+        i = rand() % end + start;
+    }
+    if (type == 3) {
+        // after sorting do the "sueta"...
+        std::sort(vec.begin(), vec.end());
+        int swaps_cnt = n / 10;
+        srand(time(nullptr));
+        for (int i = 0; i < swaps_cnt; ++i) {
+            int x = rand() % n;
+            int y = rand() % n;
+            std::swap(vec[x], vec[y]);
+        }
+    } else if (type == 4) {
+        std::sort(vec.begin(), vec.end());
+        std::reverse(vec.begin(), vec.end());
+    }
+    return vec;
+}
+
+std::vector< std::vector< std::vector< std::vector<int> > > > getVecData() {
+    std::vector< std::vector< std::vector< std::vector<int> > > > vec_data;
+    for (int range = 1; range <= 2; ++range) {
+        int size_begin = 50;
+        int size_end = 300;
+        int step = 50;
+        if (range > 1) {
+            size_begin = 100;
+            size_end = 4100;
+            step = 100;
+        }
+        std::vector< std::vector< std::vector<int> > > vec_list;
+        for (int type = 1; type <= 4; ++type) {
+            std::vector< std::vector<int> > vec_list_type;
+            for (int size = size_begin; size <= size_end; size += step) {
+                auto vec = generateVec(size, type);
+                vec_list_type.push_back(vec);
+            }
+            vec_list.push_back(vec_list_type);
+        }
+        vec_data.push_back(vec_list);
+    }
+    return vec_data;
+}
+
+// write array's content to files (.txt or .cvs)
+
+void outputVec(const std::vector<int>& vec, const std::string& filename) {
+    std::ofstream outfile(filename, std::ios_base::app);
+    if (outfile.is_open()) {
+        for (int i : vec) {
+            outfile << i << " ";
+        }
+        outfile << "\n\n";
+        outfile.close();
+        std::cout << "Array written to file " << filename << std::endl;
+    }
+    else {
+        std::cerr << "Error: unable to open file " << filename << std::endl;
+    }
+}
+
+void writeSortsTime(std::vector<double> &ns) {
+    // write values to file .cvs
+}
 
 // launching sort processes functions
 
@@ -368,9 +443,12 @@ void getSortsTime(const std::vector<int> &a, std::vector<std::vector<int64_t>> &
             clock_gettime(CLOCK_MONOTONIC, &end);
             elapsed_ns = timespecDifference(end, start);
             sorts_ns[i][j] = elapsed_ns;
-            std::cout << "#" << i + 1 << " Sort: ";
-            for (int x : copy_vec) {
-                std::cout << x << " ";
+            if (j == 0) {
+                std::cout << "#" << i + 1 << " Sort: ";
+                for (int x : copy_vec) {
+                    std::cout << x << " ";
+                }
+                outputVec(copy_vec, OUTPUT_FILENAME);
             }
             std::cout << "\nSort time: " << elapsed_ns << " ns\n\n";
         }
@@ -378,6 +456,7 @@ void getSortsTime(const std::vector<int> &a, std::vector<std::vector<int64_t>> &
 }
 
 void launchSorts(const std::vector<int> &vec) {
+    outputVec(vec, INPUT_FILENAME);
     std::vector<std::vector<int64_t>> sorts_ns(SORTS_CNT, std::vector<int64_t>(MEASUREMENTS_CNT));
     getSortsTime(vec, sorts_ns);
     std::vector<double> average_sorts_ns(SORTS_CNT);
@@ -394,29 +473,9 @@ void launchSorts(const std::vector<int> &vec) {
     // return average_sorts_ns;
 }
 
-// write array's content to files (.txt or .cvs)
-
-void outputVec(const std::vector<int>& vec, const std::string& filename) {
-    std::ofstream outfile(filename);
-    if (outfile.is_open()) {
-        for (int i = 0; i < vec.size(); i++) {
-            outfile << vec[i] << " ";
-        }
-        outfile.close();
-        std::cout << "Array written to file " << filename << std::endl;
-    }
-    else {
-        std::cerr << "Error: unable to open file " << filename << std::endl;
-    }
-}
-
-void writeSortsTime(std::vector<double> &ns) {
-    // write values to file .cvs
-}
-
 // main
 
-int main() {
+int main() {/*
     std::cout << "Sorting int array\n";
     std::vector<int> vec = { 1, 3, 2, 5, 4, -10, 0, 100, 99, 101, -27, -41, 4, 2 };
     std::cout << "\nBefore: \n";
@@ -425,6 +484,41 @@ int main() {
     }
     //outputVec(vec, INPUT_FILENAME);
     std::cout << "\n\nAfter: \n";
-    launchSorts(vec);
+    */
+
+    // clear files
+    std::ofstream infile(INPUT_FILENAME, std::ios_base::trunc);
+    infile.close();
+    std::ofstream outfile(OUTPUT_FILENAME, std::ios_base::trunc);
+    outfile.close();
+
+    auto data = getVecData();
+    for (int range = 0; range < data.size(); ++range) {
+        std::cout << ( (range == 0) ? "50-300-50" : "100-4100-100" ) << "\n\n";
+        for (int type = 0; type < data[range].size(); ++type) {
+            switch (type) {
+                case 0:
+                    std::cout << "0-5 range array\n";
+                    break;
+                case 1:
+                    std::cout << "0-4000 range array\n";
+                    break;
+                case 2:
+                    std::cout << "almost sorted array\n";
+                    break;
+                case 3:
+                    std::cout << "array sorted in descending order\n";
+                    break;
+                default:
+                    break;
+            }
+            for (int v = 0; v < data[range][type].size(); ++v) {
+                std::cout << "vector #" << v + 1 << "\n\n";
+                auto vec = data[range][type][v];
+                launchSorts(vec);
+            }
+        }
+    }
+    //launchSorts(vec);
     return 0;
 }
