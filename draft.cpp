@@ -24,8 +24,8 @@ using Func = std::function<void(std::vector<int>&)>;
 
 const std::string INPUT_FILENAME = "input.txt";
 const std::string OUTPUT_FILENAME = "output.txt";
+const std::string DATA_OUTPUT = "data.csv";
 
-const int MAX_VALUE = 4100;
 const int SORTS_CNT = 13;
 const int MEASUREMENTS_CNT = 10;
 
@@ -341,7 +341,8 @@ void shellSort(std::vector<int> &a) {
 
 // generate arrays
 
-std::vector<int> generateVec(int n, int type) {
+std::pair< std::vector<int>, std::vector<double> > generateVec(int n, int type) {
+    std::pair< std::vector<int>, std::vector<double> > vec_with_list;
     std::vector<int> vec(n);
     int start = 0;
     int end = 5;
@@ -369,11 +370,12 @@ std::vector<int> generateVec(int n, int type) {
         std::sort(vec.begin(), vec.end());
         std::reverse(vec.begin(), vec.end());
     }
-    return vec;
+    vec_with_list.first = vec;
+    return vec_with_list;
 }
 
-std::vector< std::vector< std::vector< std::vector<int> > > > getVecData() {
-    std::vector< std::vector< std::vector< std::vector<int> > > > vec_data;
+std::vector< std::vector< std::vector< std::pair< std::vector<int>, std::vector<double> > > > > getVecData() {
+    std::vector< std::vector< std::vector< std::pair< std::vector<int>, std::vector<double> > > > > vec_data;
     for (int range = 1; range <= 2; ++range) {
         int size_begin = 50;
         int size_end = 300;
@@ -383,9 +385,9 @@ std::vector< std::vector< std::vector< std::vector<int> > > > getVecData() {
             size_end = 4100;
             step = 100;
         }
-        std::vector< std::vector< std::vector<int> > > vec_list;
+        std::vector< std::vector< std::pair< std::vector<int>, std::vector<double> > > > vec_list;
         for (int type = 1; type <= 4; ++type) {
-            std::vector< std::vector<int> > vec_list_type;
+            std::vector< std::pair< std::vector<int>, std::vector<double> > > vec_list_type;
             for (int size = size_begin; size <= size_end; size += step) {
                 auto vec = generateVec(size, type);
                 vec_list_type.push_back(vec);
@@ -408,8 +410,66 @@ void outputVec(const std::vector<int>& vec, const std::string& filename) {
         outfile << "\n\n";
         outfile.close();
         std::cout << "Array written to file " << filename << std::endl;
+    } else {
+        std::cerr << "Error: unable to open file " << filename << std::endl;
     }
-    else {
+}
+
+// Template function to determine the appropriate record separator based on the file extension
+template<typename T>
+std::string getRecordSeparator(const std::string& filename) {
+    if constexpr (std::is_same_v<T, int>) {
+        return "\n";
+    } else if constexpr (std::is_same_v<T, std::vector< std::vector< std::vector< std::pair< std::vector<int>, std::vector<double> > > > > >) {
+        if (filename.size() >= 4 && filename.substr(filename.size() - 4) == ".csv") {
+            return ";";
+        } else {
+            return "\n\n";
+        }
+    }
+}
+/*
+// Template function to output the contents of a vector to a file
+template<typename T>
+void outputVec(const std::vector<T>& vec, const std::string& filename) {
+    // Open the file for writing
+    std::ofstream outfile(filename);
+
+    if (outfile.is_open()) {
+        // Iterate over the vector and write each element to the file
+        for (const auto& v : vec) {
+            outfile << v << getRecordSeparator<T>(filename);
+        }
+        // Close the file
+        outfile.close();
+        std::cout << "Array written to file " << filename << std::endl;
+    } else {
+        std::cerr << "Error: unable to open file " << filename << std::endl;
+    }
+}
+*/
+void outputVecPair(const std::vector< std::vector< std::vector< std::pair< std::vector<int>, std::vector<double> > > > > &data, const std::string& filename) {
+    std::ofstream outfile(filename);
+    if (outfile.is_open()) {
+        for (int range = 0; range < data.size(); ++range) {
+            outfile << range + 1 << ";";
+            for (int type = 0; type < data[range].size(); ++type) {
+                outfile << type + 1 << ";";
+                for (int v = 0; v < data[range][type].size(); ++v) {
+                    outfile << v + 1 << ";";
+                    auto pair = data[range][type][v];
+                    for (auto time : pair.second) {
+                        outfile << time << ";";
+                    }
+                    outfile << "\n";
+                }
+                outfile << "\n";
+            }
+            outfile << "\n";
+        }
+        outfile.close();
+        std::cout << "Array written to file " << filename << std::endl;
+    } else {
         std::cerr << "Error: unable to open file " << filename << std::endl;
     }
 }
@@ -444,21 +504,22 @@ void getSortsTime(const std::vector<int> &a, std::vector<std::vector<int64_t>> &
             elapsed_ns = timespecDifference(end, start);
             sorts_ns[i][j] = elapsed_ns;
             if (j == 0) {
+                /*
                 std::cout << "#" << i + 1 << " Sort: ";
                 for (int x : copy_vec) {
                     std::cout << x << " ";
-                }
+                }*/
                 outputVec(copy_vec, OUTPUT_FILENAME);
             }
-            std::cout << "\nSort time: " << elapsed_ns << " ns\n\n";
+            //std::cout << "\nSort time: " << elapsed_ns << " ns\n\n";
         }
     }
 }
 
-void launchSorts(const std::vector<int> &vec) {
-    outputVec(vec, INPUT_FILENAME);
+void launchSorts(std::pair<std::vector<int>, std::vector<double>> &vec) {
+    outputVec(vec.first, INPUT_FILENAME);
     std::vector<std::vector<int64_t>> sorts_ns(SORTS_CNT, std::vector<int64_t>(MEASUREMENTS_CNT));
-    getSortsTime(vec, sorts_ns);
+    getSortsTime(vec.first, sorts_ns);
     std::vector<double> average_sorts_ns(SORTS_CNT);
     for (int i = 0; i < sorts_ns.size(); ++i) {
         int64_t sum = 0;
@@ -467,6 +528,7 @@ void launchSorts(const std::vector<int> &vec) {
         }
         average_sorts_ns[i] = static_cast<double>(sum) / MEASUREMENTS_CNT;
     }
+    vec.second = average_sorts_ns;
     for (int i = 0; i < SORTS_CNT; ++i) {
         std::cout << "#" << i + 1 << ": " << average_sorts_ns[i] << "\n";
     }
@@ -475,22 +537,15 @@ void launchSorts(const std::vector<int> &vec) {
 
 // main
 
-int main() {/*
-    std::cout << "Sorting int array\n";
-    std::vector<int> vec = { 1, 3, 2, 5, 4, -10, 0, 100, 99, 101, -27, -41, 4, 2 };
-    std::cout << "\nBefore: \n";
-    for (int i : vec) {
-        std::cout << i << " ";
-    }
-    //outputVec(vec, INPUT_FILENAME);
-    std::cout << "\n\nAfter: \n";
-    */
-
+int main() {
     // clear files
     std::ofstream infile(INPUT_FILENAME, std::ios_base::trunc);
     infile.close();
     std::ofstream outfile(OUTPUT_FILENAME, std::ios_base::trunc);
     outfile.close();
+
+    //std::ofstream datafile(DATA_OUTPUT, std::ios_base::trunc);
+    //datafile.close();
 
     auto data = getVecData();
     for (int range = 0; range < data.size(); ++range) {
@@ -516,9 +571,14 @@ int main() {/*
                 std::cout << "vector #" << v + 1 << "\n\n";
                 auto vec = data[range][type][v];
                 launchSorts(vec);
+                data[range][type][v].second = vec.second;/*
+                for (auto x : vec.second) {
+                    std::cout << "!!!! " << x;
+                }
+                std::cout << " !!!!!\n\n";*/
             }
         }
     }
-    //launchSorts(vec);
+    outputVecPair(data, DATA_OUTPUT);
     return 0;
 }
