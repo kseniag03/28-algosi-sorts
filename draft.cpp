@@ -448,18 +448,38 @@ void outputVec(const std::vector<T>& vec, const std::string& filename) {
     }
 }
 */
+
+const std::map<int, std::string> sorts_names = {
+        { 1, "select" },
+        { 2, "bubble" },
+        { 3, "Aversion1" },
+        { 4, "Aversion2" },
+        { 5, "insert" },
+        { 6, "binaryInsert" },
+        { 7, "count" },
+        { 8, "radix" },
+        { 9, "merge" },
+        { 10, "quick" },
+        { 11, "heap" },
+        { 12, "shellCiura" },
+        { 13, "shell" },
+};
+
 void outputVecPair(const std::vector< std::vector< std::vector< std::pair< std::vector<int>, std::vector<double> > > > > &data, const std::string& filename) {
     std::ofstream outfile(filename);
     if (outfile.is_open()) {
+        outfile << " ;";
+        for (int i = 0; i < SORTS_CNT; ++i) {
+            outfile << sorts_names.at(i + 1) << ";";
+        }
+        outfile << "\n";
         for (int range = 0; range < data.size(); ++range) {
-            outfile << range + 1 << ";";
             for (int type = 0; type < data[range].size(); ++type) {
-                outfile << type + 1 << ";";
                 for (int v = 0; v < data[range][type].size(); ++v) {
                     outfile << v + 1 << ";";
                     auto pair = data[range][type][v];
-                    for (auto time : pair.second) {
-                        outfile << time << ";";
+                    for (auto i : pair.second) {
+                        outfile << i << ";";
                     }
                     outfile << "\n";
                 }
@@ -511,6 +531,8 @@ void getSortsTime(const std::vector<int> &a, std::vector<std::vector<int64_t>> &
                 }*/
                 outputVec(copy_vec, OUTPUT_FILENAME);
             }
+
+            break; /// !!!!!!!!!!!!!!!
             //std::cout << "\nSort time: " << elapsed_ns << " ns\n\n";
         }
     }
