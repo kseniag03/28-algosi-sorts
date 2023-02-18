@@ -425,6 +425,8 @@ std::pair< std::vector<int>, std::pair<std::vector<double>, std::vector<int>> > 
         std::reverse(vec.begin(), vec.end());
     }
     vec_with_list.first = vec;
+    std::vector<int> cnt(SORTS_CNT);
+    vec_with_list.second.second = cnt;
     return vec_with_list;
 }
 
