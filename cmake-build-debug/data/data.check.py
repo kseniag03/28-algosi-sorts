@@ -61,13 +61,3 @@ for data_dir in data_dir_list:
 
         # Show the plot
         #plt.show()
-
-
-
-#data_dir = "D:\\Contest_check\\algosi\\chw01\\data-check\\sorts-graphs\\count-100"
-    
-# D:\Contest_check\algosi\chw01\\data-check
-# D:\\Contest_check\\algosi\\chw01\\data-check\\sorts-graphs\\time-50
-# D:\\Contest_check\\algosi\\chw01\\data-check\\sorts-graphs\\count-50
-# D:\\Contest_check\\algosi\\chw01\\data-check\\sorts-graphs\\time-100
-# D:\\Contest_check\\algosi\\chw01\\data-check\\sorts-graphs\\count-100
