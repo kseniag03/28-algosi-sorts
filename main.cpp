@@ -144,37 +144,51 @@ void outputVec(const std::vector<int>& vec, const std::string& filename) {
 void outputVecPair(const std::vector< std::vector< std::vector<
         std::pair< std::vector<int>, std::pair<std::vector<double>, std::vector<int>> >
                 > > > &data, const std::string& filename) {
-    std::ofstream outfile(filename);
-    if (outfile.is_open()) {
-        for (int measure_type = 0; measure_type < 2; ++measure_type) {
-            outfile << " ;";
-            for (int i = 0; i < SORTS_CNT; ++i) {
-                outfile << sorts_names.at(i + 1) << ";";
-            }
-            outfile << "\n";
-            for (const auto & range : data) {
-                for (const auto & type : range) {
-                    for (int v = 0; v < type.size(); ++v) {
-                        outfile << v + 1 << ";";
-                        auto pair = type[v];
-                        for (int i = 0; i < SORTS_CNT; ++i) {
-                            outfile << ( (measure_type == 0) ? pair.second.first[i] : pair.second.second[i] );
-                            if (i < SORTS_CNT - 1) {
-                                outfile << ";";
-                            }
+    int num = 0;
+    for (int measure_type = 0; measure_type < 2; ++measure_type) {
+        for (int range = 0; range < data.size(); ++range) {
+            for (int type = 0; type < data[range].size(); ++type) {
+                ++num;
+                std::string file = "0" + std::to_string(num) + filename;
+                std::ofstream outfile(file);
+                switch (type) {
+                    case 0:
+                        outfile << "0-5\n";
+                        break;
+                    case 1:
+                        outfile << "0-4000\n";
+                        break;
+                    case 2:
+                        outfile << "almost-sorted\n";
+                        break;
+                    case 3:
+                        outfile << "sorted-descend\n";
+                        break;
+                    default:
+                        break;
+                }
+                outfile << " ;";
+                for (int i = 0; i < SORTS_CNT; ++i) {
+                    outfile << sorts_names.at(i + 1) << ";";
+                }
+                outfile << "\n";
+                for (int v = 0; v < data[range][type].size(); ++v) {
+                    int step = (range == 0) ? 50 : 100;
+                    int arr_size = (v + 1) * step;
+                    outfile << arr_size << ";";
+                    auto pair = data[range][type][v];
+                    for (int i = 0; i < SORTS_CNT; ++i) {
+                        outfile << ( (measure_type == 0) ? pair.second.first[i] : pair.second.second[i] );
+                        if (i < SORTS_CNT - 1) {
+                            outfile << ";";
                         }
-                        outfile << "\n";
                     }
                     outfile << "\n";
                 }
-                outfile << "\n";
+                outfile.close();
+                std::cout << "Array written to file " << file << "\n";
             }
-            outfile << "\n\n";
         }
-        outfile.close();
-        std::cout << "Array written to file " << filename << std::endl;
-    } else {
-        std::cerr << "Error: unable to open file " << filename << std::endl;
     }
 }
 
@@ -217,9 +231,6 @@ void launchSorts(std::pair< std::vector<int>, std::pair<std::vector<double>, std
         average_sorts_ns[i] = static_cast<double>(sum) / MEASUREMENTS_CNT;
     }
     vec.second.first = average_sorts_ns;
-    for (int i = 0; i < SORTS_CNT; ++i) {
-        std::cout << "#" << i + 1 << ": " << average_sorts_ns[i] << "\n";
-    }
 }
 
 // main
@@ -236,22 +247,7 @@ int main() {
     for (int range = 0; range < data.size(); ++range) {
         std::cout << ( (range == 0) ? "50-300-50" : "100-4100-100" ) << "\n\n";
         for (int type = 0; type < data[range].size(); ++type) {
-            switch (type) {
-                case 0:
-                    std::cout << "0-5 range array\n";
-                    break;
-                case 1:
-                    std::cout << "0-4000 range array\n";
-                    break;
-                case 2:
-                    std::cout << "almost sorted array\n";
-                    break;
-                case 3:
-                    std::cout << "array sorted in descending order\n";
-                    break;
-                default:
-                    break;
-            }
+            std::cout << "type #" << type + 1 << "\n\n";
             for (int v = 0; v < data[range][type].size(); ++v) {
                 std::cout << "vector #" << v + 1 << "\n\n";
                 launchSorts(data[range][type][v]);
