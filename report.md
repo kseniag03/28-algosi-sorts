@@ -135,7 +135,7 @@ ________________________
 
 ### 4.10. Сортировка быстрая (первый эл-т опорный)
 ![image](cmake-build-debug/data/sorts-graphs/time-50/10sort-time-50.png)
-![image](cmake-build-debug/data/sorts-graphзуs/time-100/10sort-time-100.png)
+![image](cmake-build-debug/data/sorts-graphs/time-100/10sort-time-100.png)
 ![image](cmake-build-debug/data/sorts-graphs/count-50/10sort-count-50.png)
 ![image](cmake-build-debug/data/sorts-graphs/count-100/10sort-count-100.png)
 
