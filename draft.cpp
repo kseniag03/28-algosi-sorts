@@ -19,7 +19,6 @@
 #include <map>
 #include <string>
 #include <vector>
-// #include <chrono> // ?
 
 // shortened name for sorting function
 using Func = std::function<void(std::vector<int>&, int&)>;
@@ -93,7 +92,7 @@ void bubbleSort(std::vector<int> &a, int &cnt) {
     }
 }
 
-// #3 bubble sort with Aversion modification 1 // ?
+// #3 bubble sort with Aversion modification 1
 
 void bubbleSortAversion1(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
@@ -119,7 +118,7 @@ void bubbleSortAversion1(std::vector<int> &a, int &cnt) {
     }
 }
 
-// #4 bubble sort with Aversion modification 1 + 2 // ?
+// #4 bubble sort with Aversion modification 1 + 2
 
 void bubbleSortAversion2(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
@@ -409,8 +408,9 @@ void shellSortWithCiura(std::vector<int> &a, int &cnt) {
     for (; i >= 0; --i) {
         cnt += 2;
         d = ciuraSeq[i];
-        cnt += 2 + 2 * (n - d);
+        cnt += 2;
         for (j = d; j < n; ++j) {
+            cnt += 2;
             temp = a[j];
             int k;
             cnt += 3;
