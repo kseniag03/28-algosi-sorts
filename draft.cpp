@@ -6,7 +6,9 @@
    функция проверки упорядоченности элементов массива
    генерация массивов
    вывод исходного массива в input.txt, полученного в output.txt
-5) счётчик эл-х операций, графики, сохранение результатов замеров в файл .cvs
+   сохранение результатов замеров в файл .cvs
+   счётчик эл-х операций
+5) графики
 */
 
 #include <algorithm>
@@ -41,6 +43,7 @@ int64_t timespecDifference(struct timespec a, struct timespec b) {
 }
 
 // checks if an array is sorted in ascending order
+
 bool isAscending(std::vector<int>& a) {
     int n = static_cast<int>(a.size());
     for (int i = 1; i < n; ++i) {
@@ -55,7 +58,7 @@ bool isAscending(std::vector<int>& a) {
 
 void selectionSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
-    cnt = 2 + 2 * (n - 1);
+    cnt += 2 + 2 * (n - 1);
     for (int i = 0; i < n - 1; ++i) {
         int min = i;
         ++cnt;
@@ -76,7 +79,7 @@ void selectionSort(std::vector<int> &a, int &cnt) {
 
 void bubbleSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
-    cnt = 2 + 2 * (n - 1);
+    cnt += 2 + 2 * (n - 1);
     for (int i = 0; i < n - 1; ++i) {
         cnt += 3 + 2 * (n - i - 1);
         for (int j = 0; j < n - i - 1; ++j) {
@@ -94,7 +97,7 @@ void bubbleSort(std::vector<int> &a, int &cnt) {
 
 void bubbleSortAversion1(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
-    cnt = 2 + 2 * (n - 1);
+    cnt += 2 + 2 * (n - 1);
     for (int i = 0; i < n - 1; ++i) {
         bool swapped = false;
         ++cnt;
@@ -121,7 +124,7 @@ void bubbleSortAversion1(std::vector<int> &a, int &cnt) {
 void bubbleSortAversion2(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
     int new_n;
-    cnt = 1;
+    cnt += 1;
     do {
         new_n = 0;
         ++cnt;
@@ -141,11 +144,11 @@ void bubbleSortAversion2(std::vector<int> &a, int &cnt) {
     } while (new_n > 1);
 }
 
-// #5 insertion sort // ?
+// #5 insertion sort
 
 void insertionSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
-    cnt = 1 + 2 * (n - 1);
+    cnt += 1 + 2 * (n - 1);
     for (int i = 1; i < n; ++i) {
         int j = i;
         ++cnt;
@@ -159,11 +162,11 @@ void insertionSort(std::vector<int> &a, int &cnt) {
     }
 }
 
-// #6 binary insertion sort // ?
+// #6 binary insertion sort
 
 void binaryInsertionSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
-    cnt = 1 + 2 * (n - 1);
+    cnt += 1 + 2 * (n - 1);
     for (int i = 1; i < n; ++i) {
         int left = 0;
         int right = i;
@@ -198,7 +201,7 @@ void binaryInsertionSort(std::vector<int> &a, int &cnt) {
 void countingSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
     int max = 0;
-    cnt = 2 + 2 * n;
+    cnt += 2 + 2 * n;
     for (int i = 0; i < n; ++i) {
         ++cnt;
         if (a[i] > max) {
@@ -242,121 +245,156 @@ void radixSort(std::vector<int> &a, int &cnt) {
     std::vector<int> b(n);
     const int integer_bites = 4;
     const int base = 256;
+    cnt += 2 + 2 * integer_bites;
     for (int i = 0; i < integer_bites; ++i) {
         std::vector<int> c(base, 0);
+        ++cnt;
         const int mask = base - 1;
+        cnt += 1 + 2 * n;
         for (int j = 0; j < n; ++j) {
             ++c[((a[j]) >> (i * 8)) & mask];
+            cnt += 4;
         }
+        cnt += 1 + 2 * (base - 1);
         for (int j = 1; j < base; ++j) {
             c[j] += c[j - 1];
+            cnt += 2;
         }
+        cnt += 2 + 2 * n;
         for (int j = n - 1; j >= 0; --j) {
             b[--c[((a[j]) >> (i * 8)) & mask]] = a[j];
+            cnt += 5;
         }
+        cnt += 1 + 2 * n;
         for (int j = 0; j < n; ++j) {
             a[j] = b[j];
+            ++cnt;
         }
     }
 }
 
 // #9 merge sort
 
-std::vector<int> merge(std::vector<int> &a, std::vector<int> &b) {
+std::vector<int> merge(std::vector<int> &a, std::vector<int> &b, int &cnt) {
     int n = static_cast<int>(a.size());
     int m = static_cast<int>(b.size());
     int i = 0, j = 0;
     std::vector<int> c;
+    cnt += 2;
     while (i < n && j < m) {
+        cnt += 3;
         if (a[i] < b[j]) {
             c.push_back(a[i]);
             ++i;
+            cnt += 2;
         } else {
             c.push_back(b[j]);
             ++j;
+            cnt += 2;
         }
     }
     while (i < n) {
         c.push_back(a[i]);
         ++i;
+        cnt += 3;
     }
     while (j < m) {
         c.push_back(b[j]);
         ++j;
+        cnt += 3;
     }
     return c;
 }
 
 void mergeSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
+    cnt += 1;
     if (n > 1) {
         int m = n / 2;
         std::vector<int> b(a.begin(), a.begin() + m);
         std::vector<int> c(a.begin() + m, a.end());
+        cnt += 4;
         mergeSort(b, cnt);
         mergeSort(c, cnt);
-        a = merge(b, c);
+        a = merge(b, c, cnt);
+        ++cnt;
     }
 }
 
 // #10 quick sort (first element)
 
 void quickSort(std::vector<int> &a, int &cnt) {
-    if (a.size() <= 1) {
-        return;  // already sorted
+    int n = static_cast<int>(a.size());
+    ++cnt;
+    if (n <= 1) {
+        return;
     }
-    int pivot = a[0];  // choose first element as pivot
+    // choose first element as pivot
+    int pivot = a[0];
     std::vector<int> left, right;
-    for (int i = 0; i < a.size() - 1; ++i) {
+    cnt += 3 + 2 * (n - 1);
+    for (int i = 0; i < n - 1; ++i) {
+        cnt += 2;
         if (a[i] < pivot) {
             left.push_back(a[i]);
         } else {
             right.push_back(a[i]);
         }
     }
-    quickSort(left, cnt);   // recursively sort left and right subarrays
+    // recursively sort left and right subarrays
+    quickSort(left, cnt);
     quickSort(right, cnt);
     a.clear();
     a.reserve(left.size() + right.size() + 1);
     a.insert(a.end(), left.begin(), left.end());
     a.push_back(pivot);
     a.insert(a.end(), right.begin(), right.end());
+    cnt += n + static_cast<int>(left.size()) + 1 + static_cast<int>(right.size());
 }
 
 // #11 heap sort
 
-void heapify(std::vector<int> &vec, int n, int i) {
+void heapify(std::vector<int> &vec, int n, int i, int &cnt) {
     int left = 2 * i + 1;
     int right = 2 * i + 2;
     int largest = i;
+    cnt += 9;
     if (left < n && vec[largest] < vec[left]) {
         largest = left;
+        ++cnt;
     }
+    cnt += 2;
     if (right < n && vec[largest] < vec[right]) {
         largest = right;
+        ++cnt;
     }
+    ++cnt;
     if (largest != i) {
         int replace = vec[i];
         vec[i] = vec[largest];
         vec[largest] = replace;
-        heapify(vec, n, largest);
+        cnt += 3;
+        heapify(vec, n, largest, cnt);
     }
 }
 
 void heapSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
+    cnt += 3 + n;
     for (int i = n / 2 - 1; i >= 0; --i) {
-        heapify(a, n, i);
+        heapify(a, n, i, cnt);
     }
+    cnt += 1 + 2 * n;
     for (int i = n - 1; i >= 0; --i) {
         int replace = a[0];
         a[0] = a[i];
         a[i] = replace;
-        heapify(a, i, 0);
+        cnt += 3;
+        heapify(a, i, 0, cnt);
     }
 }
 
-// #12 shell sort (Ciura sequence) // ???
+// #12 shell sort (Ciura sequence)
 
 const int ciuraSeq[20] = { 0, 1, 4, 10, 23, 57, 132, 301, 701, 1750, 4001,
                         10001, 20001, 50001, 100001, 200001, 500001, 1000001, 2000001 };
@@ -364,31 +402,45 @@ const int ciuraSeq[20] = { 0, 1, 4, 10, 23, 57, 132, 301, 701, 1750, 4001,
 void shellSortWithCiura(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
     int i, j, d, temp;
-    for (i = 19; ciuraSeq[i] > n; --i);
+    cnt += 1;
+    for (i = 19; ciuraSeq[i] > n; --i) {
+        cnt += 2;
+    }
     for (; i >= 0; --i) {
+        cnt += 2;
         d = ciuraSeq[i];
+        cnt += 2 + 2 * (n - d);
         for (j = d; j < n; ++j) {
             temp = a[j];
             int k;
-            for (k = j; k >= d && temp < a[k - d]; k -= d)
+            cnt += 3;
+            for (k = j; k >= d && temp < a[k - d]; k -= d) {
+                cnt += 5;
                 a[k] = a[k - d];
+            }
             a[k] = temp;
+            ++cnt;
         }
     }
 }
 
-// #13 shell sort (Shell sequence) // ???
+// #13 shell sort (Shell sequence)
 
 void shellSort(std::vector<int> &a, int &cnt) {
     int n = static_cast<int>(a.size());
+    cnt += 2;
     for (int d = n / 2; d > 0; d /= 2) {
+        cnt += 3 + 2 * (n - d);
         for (int i = d; i < n; ++i) {
             int temp = a[i];
             int j;
+            cnt += 3;
             for (j = i; j >= d && a[j - d] > temp; j -= d) {
+                cnt += 5;
                 a[j] = a[j - d];
             }
             a[j] = temp;
+            ++cnt;
         }
     }
 }
@@ -432,7 +484,6 @@ std::pair< std::vector<int>, std::pair<std::vector<double>, std::vector<int>> > 
 
 std::vector< std::vector< std::vector< std::pair< std::vector<int>, std::pair<std::vector<double>, std::vector<int>> > > > > getVecData() {
     std::vector< std::vector< std::vector<
-            /* std::pair< std::vector<int>, std::vector<double> > >*/
             std::pair< std::vector<int>, std::pair<std::vector<double>, std::vector<int>> >
             > > > vec_data;
     for (int range = 1; range <= 2; ++range) {
@@ -468,30 +519,21 @@ void outputVec(const std::vector<int>& vec, const std::string& filename) {
         }
         outfile << "\n\n";
         outfile.close();
-        //std::cout << "Array written to file " << filename << std::endl;
-    } else {
-        //std::cerr << "Error: unable to open file " << filename << std::endl;
     }
 }
 
+// create a map to write sorts names in table
+
 const std::map<int, std::string> sorts_names = {
         { 1, "select" },
-        { 2, "bubble" },
-        { 3, "Aversion1" },
-        { 4, "Aversion2" },
-        { 5, "insert" },
-        { 6, "binaryInsert" },
-        { 7, "count" },
-        { 8, "radix" },
-        { 9, "merge" },
-        { 10, "quick" },
-        { 11, "heap" },
-        { 12, "shellCiura" },
-        { 13, "shell" },
+        { 2, "bubble" }, { 3, "Aversion1" }, { 4, "Aversion2" },
+        { 5, "insert" }, { 6, "binaryInsert" },
+        { 7, "count" }, { 8, "radix" },
+        { 9, "merge" }, { 10, "quick" }, { 11, "heap" },
+        { 12, "shellCiura" }, { 13, "shell" },
 };
 
 void outputVecPair(const std::vector< std::vector< std::vector<
-        /*std::pair< std::vector<int>, std::vector<double> >*/
         std::pair< std::vector<int>, std::pair<std::vector<double>, std::vector<int>> >
                 > > > &data, const std::string& filename) {
     std::ofstream outfile(filename);
@@ -507,13 +549,10 @@ void outputVecPair(const std::vector< std::vector< std::vector<
                     for (int v = 0; v < data[range][type].size(); ++v) {
                         outfile << v + 1 << ";";
                         auto pair = data[range][type][v];
-                        if (measure_type == 0) {
-                            for (auto i : pair.second.first) {
-                                outfile << i << ";";
-                            }
-                        } else {
-                            for (auto i : pair.second.second) {
-                                outfile << i << ";";
+                        for (int i = 0; i < SORTS_CNT; ++i) {
+                            outfile << ( (measure_type == 0) ? pair.second.first[i] : pair.second.second[i] );
+                            if (i < SORTS_CNT - 1) {
+                                outfile << ";";
                             }
                         }
                         outfile << "\n";
@@ -533,12 +572,14 @@ void outputVecPair(const std::vector< std::vector< std::vector<
 
 // launching sort processes functions
 
-const Func sorts[SORTS_CNT] = { selectionSort,
-                                 bubbleSort, bubbleSortAversion1, bubbleSortAversion2,
-                                 insertionSort, binaryInsertionSort,
-                                 countingSort, radixSort,
-                                 mergeSort, quickSort, heapSort,
-                                 shellSortWithCiura, shellSort };
+const Func sorts[SORTS_CNT] = {
+        selectionSort,
+        bubbleSort, bubbleSortAversion1, bubbleSortAversion2,
+        insertionSort, binaryInsertionSort,
+        countingSort, radixSort,
+        mergeSort, quickSort, heapSort,
+        shellSortWithCiura, shellSort
+};
 
 void getSortsTime(const std::vector<int> &a, std::vector<std::vector<int64_t>> &sorts_ns, std::vector<int> &cnt) {
     std::map<int, Func> s;
@@ -551,22 +592,15 @@ void getSortsTime(const std::vector<int> &a, std::vector<std::vector<int64_t>> &
             int64_t elapsed_ns;
             auto copy_vec = a;
             auto sort = s[i];
+            cnt[i] = 0;
             clock_gettime(CLOCK_MONOTONIC, &start);
             sort(copy_vec, cnt[i]);
             clock_gettime(CLOCK_MONOTONIC, &end);
             elapsed_ns = timespecDifference(end, start);
             sorts_ns[i][j] = elapsed_ns;
             if (j == 0) {
-                /*
-                std::cout << "#" << i + 1 << " Sort: ";
-                for (int x : copy_vec) {
-                    std::cout << x << " ";
-                }*/
                 outputVec(copy_vec, OUTPUT_FILENAME);
             }
-
-            break; /// !!!!!!!!!!!!!!!
-            //std::cout << "\nSort time: " << elapsed_ns << " ns\n\n";
         }
     }
 }
