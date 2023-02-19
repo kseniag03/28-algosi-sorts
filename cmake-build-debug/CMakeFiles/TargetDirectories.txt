@@ -1,0 +1,3 @@
+/Users/uliabakurskaa/Documents/algosi/28-sort-algosies/cmake-build-debug/CMakeFiles/28_sort_algosies.dir
+/Users/uliabakurskaa/Documents/algosi/28-sort-algosies/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/uliabakurskaa/Documents/algosi/28-sort-algosies/cmake-build-debug/CMakeFiles/rebuild_cache.dir
